@@ -14,7 +14,7 @@ base_model = Speech2Text
 base_params = {
   "random_seed": 0,
   "use_horovod": False,
-  "num_epochs": 12,
+  "num_epochs": 200,
 
   "num_gpus": 1,
   "batch_size_per_gpu": 32,
@@ -24,10 +24,11 @@ base_params = {
   "print_samples_steps": 5000,
   "eval_steps": 5000,
   "save_checkpoint_steps": 1000,
-  "logdir": "experiments/librispeech-quick",
+  "logdir": "experiments/ds2_small_man",
 
   "optimizer": "Adam",
   "optimizer_params": {},
+  'max_grad_norm': 1.0,
   "lr_policy": exp_decay,
   "lr_policy_params": {
     "learning_rate": 0.0001,
@@ -86,9 +87,9 @@ base_params = {
     "beta": 1.0,
 
     "decoder_library_path": "ctc_decoder_with_lm/libctc_decoder_with_kenlm.so",
-    "lm_path": "language_model/4-gram.binary",
-    "trie_path": "language_model/trie.binary",
-    "alphabet_config_path": "open_seq2seq/test_utils/toy_speech_data/vocab.txt",
+    "lm_path": "/home/lokhiufung/data/mandarin/lm/4-gram.binary",
+    # "trie_path": "language_model/trie.binary",
+    "alphabet_config_path": "/home/lokhiufung/data/mandarin/vocab.txt",
   },
   "loss": CTCLoss,
   "loss_params": {},
@@ -104,11 +105,11 @@ train_params = {
       'noise_level_min': -90,
       'noise_level_max': -60
     },
-    "vocab_file": "open_seq2seq/test_utils/toy_speech_data/vocab.txt",
+    "vocab_file": "/home/lokhiufung/data/mandarin/vocab.txt",
     "dataset_files": [
-      "data/librispeech/librivox-train-clean-100.csv",
-      "data/librispeech/librivox-train-clean-360.csv",
+      "/home/lokhiufung/data/mandarin/train.csv",
     ],
+    "max_duration": 13.166,
     "shuffle": True,
   },
 }
@@ -118,9 +119,9 @@ eval_params = {
   "data_layer_params": {
     "num_audio_features": 96,
     "input_type": "spectrogram",
-    "vocab_file": "open_seq2seq/test_utils/toy_speech_data/vocab.txt",
+    "vocab_file": "/home/lokhiufung/data/mandarin/vocab.txt",
     "dataset_files": [
-      "data/librispeech/librivox-dev-clean.csv",
+      "/home/lokhiufung/data/mandarin/dev.csv",
     ],
     "shuffle": False,
   },
