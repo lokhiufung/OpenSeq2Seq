@@ -12,19 +12,20 @@ base_model = Speech2Text
 base_params = {
   "random_seed": 0,
   "use_horovod": False,
-  "num_gpus": 4,
+  "num_gpus": 1,
   "batch_size_per_gpu": 32,
 
-  "num_epochs": 50,
+  "num_epochs": 25,
 
   "save_summaries_steps": 1000,
   "print_loss_steps": 10,
   "print_samples_steps": 10000,
   "eval_steps": 10000,
   "save_checkpoint_steps": 1000,
-  "logdir": "experiments/ds2/base_000",
+  "logdir": "experiments/ds2_medium_man-700",
 
   "optimizer": "Adam",
+  'max_grad_norm': 1.0,
   "lr_policy": poly_decay,
   "lr_policy_params": {
     "learning_rate": 0.0002,
@@ -84,9 +85,9 @@ base_params = {
     "beta": 1.0,
 
     "decoder_library_path": "ctc_decoder_with_lm/libctc_decoder_with_kenlm.so",
-    "lm_path": "language_model/4-gram.binary",
-    "trie_path": "language_model/trie.binary",
-    "alphabet_config_path": "open_seq2seq/test_utils/toy_speech_data/vocab.txt",
+    "lm_path": "/home/lokhiufung/data/mandarin/lm/4-gram.binary",
+    # "trie_path": "language_model/trie.binary",
+    "alphabet_config_path": "/home/lokhiufung/data/mandarin/vocab.txt",
   },
   "loss": CTCLoss,
   "loss_params": {},
@@ -95,17 +96,16 @@ base_params = {
 train_params = {
   "data_layer": Speech2TextDataLayer,
   "data_layer_params": {
-    "num_audio_features": 160,
+    "num_audio_features": 96,
     "input_type": "spectrogram",
     "augmentation": {'time_stretch_ratio': 0.05,
                      'noise_level_min': -90,
                      'noise_level_max': -60},
-    "vocab_file": "open_seq2seq/test_utils/toy_speech_data/vocab.txt",
+    "vocab_file": "/home/lokhiufung/data/mandarin/vocab.txt",
     "dataset_files": [
-      "data/librispeech/librivox-train-clean-100.csv",
-      "data/librispeech/librivox-train-clean-360.csv",
-      "data/librispeech/librivox-train-other-500.csv"
+      "/home/lokhiufung/data/mandarin/train.csv",
     ],
+    "max_duration": 13.166,
     "shuffle": True,
   },
 }
@@ -113,12 +113,23 @@ train_params = {
 eval_params = {
   "data_layer": Speech2TextDataLayer,
   "data_layer_params": {
-    "num_audio_features": 160,
+    "num_audio_features": 96,
     "input_type": "spectrogram",
-    "vocab_file": "open_seq2seq/test_utils/toy_speech_data/vocab.txt",
+    "vocab_file": "/home/lokhiufung/data/mandarin/vocab.txt",
     "dataset_files": [
-      "data/librispeech/librivox-dev-clean.csv"
+      "/home/lokhiufung/data/mandarin/dev.csv",
     ],
+    "shuffle": False,
+  },
+}
+
+interactive_infer_params = {
+  "data_layer": Speech2TextDataLayer,
+  "data_layer_params": {
+    "num_audio_features": 96,
+    "input_type": "spectrogram",
+    "vocab_file": "/home/lokhiufung/data/mandarin/vocab.txt",
+    "dataset_files": [],
     "shuffle": False,
   },
 }

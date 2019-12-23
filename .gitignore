@@ -95,3 +95,6 @@ ENV/
 
 # temp
 experiments/
+infer_S2T/
+tmp/
+example_configs/

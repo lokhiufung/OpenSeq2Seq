@@ -14,7 +14,7 @@ base_model = Speech2Text
 base_params = {
   "random_seed": 0,
   "use_horovod": False,
-  "num_epochs": 200,
+  "num_epochs": 25,
 
   "num_gpus": 1,
   "batch_size_per_gpu": 32,
@@ -24,7 +24,7 @@ base_params = {
   "print_samples_steps": 5000,
   "eval_steps": 5000,
   "save_checkpoint_steps": 1000,
-  "logdir": "experiments/ds2_small_man",
+  "logdir": "experiments/ds2_small_man-700",
 
   "optimizer": "Adam",
   "optimizer_params": {},
