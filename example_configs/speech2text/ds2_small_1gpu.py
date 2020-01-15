@@ -8,13 +8,14 @@ from open_seq2seq.losses import CTCLoss
 from open_seq2seq.models import Speech2Text
 from open_seq2seq.optimizers.lr_policies import exp_decay
 
+ROOT = '/home/lokhiufung/data/cantonese'
 
 base_model = Speech2Text
 
 base_params = {
   "random_seed": 0,
   "use_horovod": False,
-  "num_epochs": 25,
+  "num_epochs": 100,
 
   "num_gpus": 1,
   "batch_size_per_gpu": 32,
@@ -24,7 +25,7 @@ base_params = {
   "print_samples_steps": 5000,
   "eval_steps": 5000,
   "save_checkpoint_steps": 1000,
-  "logdir": "experiments/ds2_small_man-700",
+  "logdir": "experiments/ds2_small_can-rthk77",
 
   "optimizer": "Adam",
   "optimizer_params": {},
@@ -80,16 +81,16 @@ base_params = {
   "decoder": FullyConnectedCTCDecoder,
   "decoder_params": {
     "use_language_model": False,
-
+    "infer_logits_to_pickle": True,
     # params for decoding the sequence with language model
     "beam_width": 512,
     "alpha": 2.0,
     "beta": 1.0,
 
     "decoder_library_path": "ctc_decoder_with_lm/libctc_decoder_with_kenlm.so",
-    "lm_path": "/home/lokhiufung/data/mandarin/lm/4-gram.binary",
+    "lm_path": "{}/lm/6-gram.binary".format(ROOT),
     # "trie_path": "language_model/trie.binary",
-    "alphabet_config_path": "/home/lokhiufung/data/mandarin/vocab.txt",
+    "alphabet_config_path": "{}/vocab.txt".format(ROOT),
   },
   "loss": CTCLoss,
   "loss_params": {},
@@ -105,11 +106,11 @@ train_params = {
       'noise_level_min': -90,
       'noise_level_max': -60
     },
-    "vocab_file": "/home/lokhiufung/data/mandarin/vocab.txt",
+    "vocab_file": "{}/vocab.txt".format(ROOT),
     "dataset_files": [
-      "/home/lokhiufung/data/mandarin/train.csv",
+      "{}/train.csv".format(ROOT),
     ],
-    "max_duration": 13.166,
+    "max_duration": 12.5,
     "shuffle": True,
   },
 }
@@ -119,10 +120,23 @@ eval_params = {
   "data_layer_params": {
     "num_audio_features": 96,
     "input_type": "spectrogram",
-    "vocab_file": "/home/lokhiufung/data/mandarin/vocab.txt",
+    "vocab_file": "{}/vocab.txt".format(ROOT),
     "dataset_files": [
-      "/home/lokhiufung/data/mandarin/dev.csv",
+      "{}/dev.csv".format(ROOT),
     ],
     "shuffle": False,
   },
+}
+
+infer_params = {
+    "data_layer": Speech2TextDataLayer,
+    "data_layer_params": {
+        "num_audio_features": 96,
+        "input_type": "spectrogram",
+        "vocab_file": "{}/vocab.txt".format(ROOT),
+        "dataset_files": [
+            "{}/test.csv".format(ROOT),
+        ],
+        "shuffle": False,
+    },
 }

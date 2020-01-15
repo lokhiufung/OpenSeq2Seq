@@ -76,7 +76,7 @@ def main():
   # Create model and train/eval/infer
   with tf.Graph().as_default():
     model = create_model(
-        args, base_config, config_module, base_model, hvd, checkpoint)
+        args, base_config, config_module, base_model, hvd, checkpoint)    
     hooks = None
     if ('train_params' in config_module and
         'hooks' in config_module['train_params']):

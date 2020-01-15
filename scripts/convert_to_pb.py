@@ -3,9 +3,9 @@ import tensorflow as tf
 from open_seq2seq.utils.utils import get_base_config, check_logdir, create_model
 
 # Change with your configs here
-args_S2T = ["--config_file=infer_S2T/ds2_medium.py",
+args_S2T = ["--config_file=infer_S2T/w2lplus_large_man.py",
         "--mode=interactive_infer",
-        "--logdir=experiments/ds2_medium_man-700/",
+        "--logdir=experiments/w2lplus_large_man-700/",
         "--batch_size_per_gpu=10",
 ]
 
@@ -16,7 +16,7 @@ def get_model(args, scope):
         model = create_model(args, base_config, config_module, base_model, None, checkpoint=checkpoint)
     return model, checkpoint
 
-def convert_to_pb():
+def convert_to_pb(is_trt=False):
     model_S2T, checkpoint_S2T = get_model(args_S2T, "S2T")
 
     sess_config = tf.ConfigProto(allow_soft_placement=True)
@@ -33,8 +33,7 @@ def convert_to_pb():
     loss, outputs = model_S2T.build_trt_forward_pass_graph(
                 input_tensors,
                 gpu_id=0,
-                checkpoint=checkpoint_S2T)    
-
+                checkpoint=checkpoint_S2T)
     output_node_names = ["ForwardPass/fully_connected_ctc_decoder/logits"]
 
     # fix batch norm nodes
@@ -57,7 +56,7 @@ def convert_to_pb():
         sess.graph_def,
         output_node_names)
 
-    with open('tmp/output_graph.pb', 'wb') as f:
+    with open('tmp/output_graph-w2lplus_large_man.pb', 'wb') as f:
         f.write(frozen_graph_def.SerializeToString())
 
 if __name__ == '__main__':

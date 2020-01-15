@@ -98,3 +98,6 @@ experiments/
 infer_S2T/
 tmp/
 example_configs/
+test.py
+infer_S2T/
+infer_result/

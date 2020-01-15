@@ -12,7 +12,7 @@ from open_seq2seq.optimizers.lr_policies import fixed_lr, transformer_policy, ex
 base_model = Text2SpeechTacotron
 
 dataset = "LJ"
-dataset_location = "/data/speech/LJSpeech"
+dataset_location = "/home/lokhiufung/data/english/LJSpeech-1.1"
 output_type = "both"
 
 if dataset == "MAILABS":
@@ -24,8 +24,8 @@ if dataset == "MAILABS":
 elif dataset == "LJ":
   trim = False
   mag_num_feats = 513
-  train = "train_32.csv"
-  val = "val_32.csv"
+  train = "train.csv"
+  val = "val.csv"
   batch_size = 48
 else:
   raise ValueError("Unknown dataset")
@@ -64,7 +64,7 @@ base_params = {
   "eval_steps": 500,
   "save_checkpoint_steps": 2500,
   "save_to_tensorboard": True,
-  "logdir": "result/tacotron-LJ-float",
+  "logdir": "experiments/tacotron-LJ-float",
   "max_grad_norm":1.,
 
   "optimizer": "Adam",

@@ -189,6 +189,29 @@ def evaluate_wer(logits, labels, vocab, decoder):
   wer = total_dist / total_count
   return wer, wer_per_sample
 
+def split_text_to_chars(text):
+  return [char for char in text]
+
+def evaluate_cer(logits, labels, vocab, decoder):
+  total_dist = 0.0
+  total_count = 0.0
+  cer_per_sample = np.empty(shape=len(labels))
+    
+  empty_preds = 0
+  for idx, line in enumerate(labels):
+    audio_filename = line[0]
+    label = line[-1]
+    pred = decoder(logits[audio_filename], vocab)
+    dist = levenshtein(split_text_to_chars(label.lower()), split_text_to_chars(pred.lower()))
+    if pred=='':
+      empty_preds += 1
+    total_dist += dist
+    total_count += len(split_text_to_chars(label))
+    cer_per_sample[idx] = dist / len(split_text_to_chars(label))
+  print('# empty preds: {}'.format(empty_preds))
+  cer = total_dist / total_count
+  return cer, cer_per_sample
+
 
 data = load_dump(args.logits)
 labels = load_labels(args.labels)
@@ -203,8 +226,11 @@ for line in labels:
 
 if args.mode == 'eval':
   wer, _ = evaluate_wer(logits, labels, vocab, greedy_decoder)
+  cer, _ = evaluate_wer(logits, labels, vocab, greedy_decoder)
+  
   print('Greedy WER = {:.4f}'.format(wer))
-  best_result = {'wer': 1e6, 'alpha': 0.0, 'beta': 0.0, 'beams': None} 
+  print('Greedy CER = {:.4f}'.format(cer))
+  best_result = {'wer': 1e6, 'cer': 1e6, 'alpha': 0.0, 'beta': 0.0, 'beams': None} 
   for alpha in np.arange(args.alpha, args.alpha_max, args.alpha_step):
     for beta in np.arange(args.beta, args.beta_max, args.beta_step):
       scorer = Scorer(alpha, beta, model_path=args.lm, vocabulary=vocab[:-1])
@@ -212,24 +238,36 @@ if args.mode == 'eval':
                                           beam_size=args.beam_width, 
                                           num_processes=num_cpus,
                                           ext_scoring_func=scorer)
-      total_dist = 0.0
-      total_count = 0.0
+      total_dist_wer = 0.0
+      total_dist_cer = 0.0
+      total_count_wer = 0.0
+      total_count_cer = 0.0
       for idx, line in enumerate(labels):
         label = line[-1]
         score, text = [v for v in zip(*res[idx])]
         pred = text[0]
-        dist = levenshtein(label.lower().split(), pred.lower().split())
-        total_dist += dist
-        total_count += len(label.split())
-      wer = total_dist / total_count
-      if wer < best_result['wer']:
-        best_result['wer'] = wer
+        dist_wer = levenshtein(label.lower().split(), pred.lower().split())
+        dist_cer = levenshtein(split_text_to_chars(label.lower()), split_text_to_chars(pred.lower()))
+
+        total_dist_wer += dist_wer
+        total_dist_cer += dist_cer
+        total_count_wer += len(label.split())
+        total_count_cer += len(split_text_to_chars(label))
+      wer = total_dist_wer / total_count_wer
+      cer = total_dist_cer / total_count_cer
+      # if wer < best_result['wer']:
+      #   best_result['wer'] = wer
+      #   best_result['alpha'] = alpha
+      #   best_result['beta'] = beta
+      #   best_result['beams'] = res
+      if cer < best_result['cer']:  # FIXME: choose CER or WER
+        best_result['cer'] = wer
         best_result['alpha'] = alpha
         best_result['beta'] = beta
         best_result['beams'] = res
-      print('alpha={:.2f}, beta={:.2f}: WER={:.4f}'.format(alpha, beta, wer))
-  print('BEST: alpha={:.2f}, beta={:.2f}, WER={:.4f}'.format(
-        best_result['alpha'], best_result['beta'], best_result['wer']))
+      print('alpha={:.2f}, beta={:.2f}: WER={:.4f}, CER={:.4f}'.format(alpha, beta, wer, cer))
+  print('BEST: alpha={:.2f}, beta={:.2f}, WER={:.4f}, CER={:.4f}'.format(
+        best_result['alpha'], best_result['beta'], best_result['wer'], best_result['cer']))
     
   if args.dump_all_beams_to:
    with open(args.dump_all_beams_to, 'w') as f:

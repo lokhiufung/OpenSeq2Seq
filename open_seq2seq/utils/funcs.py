@@ -156,7 +156,6 @@ def train(train_model, eval_model=None, debug_port=None, custom_hooks=None):
   except NotImplementedError:
     deco_print("WARNING: Can't compute number of objects per step, since "
                "train model does not define get_num_objects_per_step method.")
-
   # starting training
   sess = tf.train.MonitoredTrainingSession(
       scaffold=scaffold,
